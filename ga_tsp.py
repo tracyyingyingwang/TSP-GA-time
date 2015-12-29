@@ -10,20 +10,31 @@ cities = OrderedDict()
 # cities_indices = []
 
 EARTH_RADIUS = 6371
+velocity_eu = 70
+velocity_pol = 50
 
 
 class Salesman():
     """salesman as an object with city sequence and fitness as attr."""
 
     def __init__(self, city_seq):
+        """initialize a salesman.
+
+        city_seq - sequence of cities for salesman journey
+        Based on that we calculate salesman's fitness as
+        1.0 / <time they need to visit all cities>
+        (and come back to starting point,
+        without visitting a city more than once)
+        """
         self.city_seq = city_seq
         # self.coords_seq = [cities[cities_names[x]] for x in city_seq]
         self.fitness = self._fitness()
 
     def _fitness(self):
+        """return fitness for the salesman."""
         # t = hf.pathlength(self.coords_seq)
         # t = hf.pathlength(self.city_seq)
-        t = hf.timelength(self.city_seq, 70, 50)
+        t = hf.timelength(self.city_seq, velocity_eu, velocity_pol)
         if t != 0:
             return 1.0 / t
         else:
@@ -79,7 +90,7 @@ def mutation(population=None, pm=1e-4):
 
 
 def cxOX(p1, p2):
-    """ordered crossover method: (works but is a bit slow)."""
+    """ordered crossover method."""
     r1 = random.randint(0, len(p1.city_seq))
     # not len()-1 because i'll be slicing
     r2 = random.randint(0, len(p2.city_seq))
