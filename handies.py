@@ -61,7 +61,8 @@ def timelength(sequence, v1, v2):
 
     sequence - set of cities
     v1 - velocity everywhere except for Poland
-    v2 - velocity in Poland"""
+    v2 - velocity in Poland
+    """
     v_c = v2  # speed through the inside of the circle [km/h]
     v = v1  # speed everywhere except for inside of the circle [km/h]
     # geographical center of Poland:
@@ -80,18 +81,28 @@ def timelength(sequence, v1, v2):
         b = 2 * numpy.dot(l, p1 - q)
         c = numpy.dot(p1, p1) + numpy.dot(q, q) - 2 * numpy.dot(p1, q) - r ** 2
         delta = b ** 2 - 4 * a * c
-        if delta <= 0:  # no solutions or tangent
-            if distance(p1, q) <= r:  # it's enough to check for only one
-                time = distance_km(p1, p2) / v_c
-            else:
-                time = distance_km(p1, p2) / v
+        if delta <= 0:  # no solutions or tangent (both could be inside*)
+            # if distance(p1, q) <= r:  # it's enough to check for only one
+            #     time = distance_km(p1, p2) / v_c
+            # else:
+            time = distance_km(p1, p2) / v
         else:
             t1 = (-b - math.sqrt(delta)) / (2 * a)
             t2 = (-b + math.sqrt(delta)) / (2 * a)
-            if 0 < t1 < 1 or 0 < t2 < 1:
-                if 0 < t2 < 1 and not(0 < t1 < 1):
+            if 0 < t1 < 1 and 0 < t2 < 1:
+                if t1 > t2:
+                    t1, t2 = t2, t1
+                # p3 will now always be the one closer to p1
+                p3 = p1 + t1 * l
+                p4 = p1 + t2 * l
+                dist3 = distance_km(p3, p4)  # inside circle
+                dist1 = distance_km(p1, p3)
+                dist2 = distance_km(p2, p4)
+                time = dist1 / v + dist2 / v + dist3 / v_c
+            elif 0 < t1 < 1 or 0 < t2 < 1:
+                if 0 < t2 < 1:
                     t1 = t2
-                p = p1 + t1 * (p2 - p1)
+                p = p1 + t1 * l
                 dist1, dist2 = 0, 0
                 if distance(p1, q) <= r:
                     dist1 = distance_km(p1, p)  # inside circle
@@ -100,18 +111,6 @@ def timelength(sequence, v1, v2):
                     dist1 = distance_km(p2, p)  # inside circle
                     dist2 = distance_km(p1, p)
                 time = dist1 / v_c + dist2 / v
-            elif 0 < t1 < 1 and 0 < t2 < 1:
-                p3 = p1 + t1 * (p2 - p1)
-                p4 = p1 + t2 * (p2 - p1)
-                dist3 = distance_km(p3, p4)  # inside circle
-                dist1 = distance_km(p1, p3)
-                dist2 = distance_km(p1, p4)
-                if dist1 > dist2:
-                    dist1 = dist2
-                    dist2 = distance_km(p2, p3)
-                else:
-                    dist2 = distance(p2, p4)
-                time = dist1 / v + dist2 / v + dist3 / v_c
             else:  # would intersect circle if extended
                 time = distance_km(p1, p2) / v
         # note: in 'ifs' above we dont care about situations involving any
@@ -120,6 +119,6 @@ def timelength(sequence, v1, v2):
         # we claim to be moving slower (or faster)
         # in our case that is Poland and also we consider
         # capital cities of EU countries and we know that none of them
-        # is on the edge of a country
+        # is on the edge of a country and thus also: * - not really...
         times_app(time)
     return sum(times)
