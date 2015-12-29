@@ -40,7 +40,11 @@ def mrange(start, stop, step):
 
 
 def pathlength(sequence):
-    """return path(loop) length for given sequence of points(tuples/lists)."""
+    """return path(loop) length for given sequence of points(tuples/lists).
+
+    I dont use distance() because it's a bit slower and readability
+    isn't that bad with math.hypot
+    """
     return sum([math.hypot(p1[0] - p2[0], p1[1] - p2[1])
                 for p1, p2 in zip(sequence, sequence[1:] + sequence[0:1])])
 
