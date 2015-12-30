@@ -29,13 +29,19 @@ class Salesman(object):
     velocity_pol_max = 80
     frequency = 0
 
-    def __init__(self, city_seq):
+    def __init__(self, city_seq, temp=False):
         """initialize a salesman.
 
         city_seq - sequence of cities for salesman's journey
+        temp - temporary salesman, i.e. dont calculate fitness
+        we dont need fitness being recalculated after crossover for example
+        we just need it for the selection process, and so we can save some time
         """
         self.city_seq = city_seq
-        self.fitness = self._fitness()
+        if temp:
+            self.fitness = 0
+        else:
+            self.fitness = self._fitness()
 
     def _fitness(self):
         """return fitness for the salesman."""
@@ -74,8 +80,8 @@ def crossingover(population=None, pc=0.9):
             if pc > r:
                 c1, c2 = cxOX(p1, p2)
 
-                children_app(Salesman(c1))
-                children_app(Salesman(c2))
+                children_app(Salesman(c1, temp=True))  # dont recalc. fitness!
+                children_app(Salesman(c2, temp=True))
             else:
                 children_app(p1)
                 children_app(p2)
