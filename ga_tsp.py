@@ -20,7 +20,7 @@ class Salesman(object):
     def __init__(self, city_seq):
         """initialize a salesman.
 
-        city_seq - sequence of cities for salesman journey
+        city_seq - sequence of cities for salesman's journey
         Based on that we calculate salesman's fitness as
         1.0 / <time they need to visit all cities>
         (and come back to starting point,
