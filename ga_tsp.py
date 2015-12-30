@@ -14,7 +14,7 @@ velocity_eu = 70
 velocity_pol = 50
 
 
-class Salesman():
+class Salesman(object):
     """salesman as an object with city sequence and fitness as attr."""
 
     def __init__(self, city_seq):

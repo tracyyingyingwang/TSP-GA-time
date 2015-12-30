@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import numpy
 
 
-def savepic(name='test.png', path='/home/luke/'):
+def savepic(name='test.png', path='/home/'):
     """save figure to a file."""
-    figure = plt.gcf()  # get current figure
-    plt.savefig(path + name)  # save
+    plt.gcf()  # get current figure
+    plt.savefig(path + name, bbox_inches='tight')  # save
     plt.clf()  # clear plot
 
 
