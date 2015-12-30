@@ -57,6 +57,7 @@ def main():
     # ga.cities_names = cities_names
     # ga.cities_indices = cities_indices
 
+    ga.Salesman.diploid = False
     starters = ga.mfp(200)
     n = 200
     pm = 0.02

@@ -61,7 +61,7 @@ def distance_km(p1, p2):
 
 
 def timelength(sequence, v1=70, v2=50, v3=80, f=0):
-    """return time of travel with given velocity.
+    r"""return time of travel with given velocity.
 
     sequence - set of cities
     v1 - velocity everywhere except for Poland

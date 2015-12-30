@@ -23,25 +23,36 @@ class Salesman(object):
     velocity_pol_min - min. velocity in Poland
     velocity_pol_max - max. velocity in Poland
     frequency - frequency of change between vpmin, vpmax
+    diploid - whether we use haploidal or diploidal encoding (boolean)
     """
     velocity_eu = 70
     velocity_pol_min = 50
     velocity_pol_max = 80
     frequency = 0
+    diploid = False
 
-    def __init__(self, city_seq, temp=False):
+    def __init__(self, city_seq, temp=False, city_seq2=None):
         """initialize a salesman.
 
         city_seq - sequence of cities for salesman's journey
+        city = point in space
         temp - temporary salesman, i.e. dont calculate fitness
         we dont need fitness being recalculated after crossover for example
         we just need it for the selection process, and so we can save some time
         """
         self.city_seq = city_seq
-        if temp:
-            self.fitness = 0
+        if not self.diploid:
+            if not temp:
+                self.fitness = self._fitness()
         else:
-            self.fitness = self._fitness()
+            if not city_seq2:
+                self.city_seq2 = random.sample(
+                    list(cities.values()), len(cities))
+            else:
+                self.city_seq2 = city_seq2
+            if not temp:
+                self.fitness1, self.fitness2 = self._fitnesses()
+                self.fitness = max(self.fitness1, self.fitness2)
 
     def _fitness(self):
         """return fitness for the salesman."""
@@ -51,6 +62,24 @@ class Salesman(object):
             return 1.0 / t
         else:
             return float('inf')
+
+    def _fitnesses(self):
+        """return fitnesses for city_seq and city_seq2."""
+        t1 = hf.timelength(self.city_seq, f=self.frequency,
+                           v1=self.velocity_eu, v2=self.velocity_pol_min,
+                           v3=self.velocity_pol_max)
+        t2 = hf.timelength(self.city_seq2, f=self.frequency,
+                           v1=self.velocity_eu, v2=self.velocity_pol_min,
+                           v3=self.velocity_pol_max)
+        if t1 != 0:
+            t1 = 1.0 / t1
+        else:
+            t1 = float('inf')
+        if t2 != 0:
+            t2 = 1.0 / t2
+        else:
+            t2 = float('inf')
+        return t1, t2
 
 
 def mfp(n=10):
@@ -78,10 +107,24 @@ def crossingover(population=None, pc=0.9):
         for p1, p2 in parents:
             r = random.random()
             if pc > r:
-                c1, c2 = cxOX(p1, p2)
+                if Salesman.diploid:
+                    if p1.fitness1 < p1.fitness2:
+                        p1.city_seq, p1.city_seq2 = p1.city_seq2, p1.city_seq
+                    if p2.fitness1 < p2.fitness2:
+                        p2.city_seq, p2.city_seq2 = p2.city_seq2, p2.city_seq
 
-                children_app(Salesman(c1, temp=True))  # dont recalc. fitness!
-                children_app(Salesman(c2, temp=True))
+                    # dominant-dominant
+                    c1, c2 = cxOX(p1.city_seq, p2.city_seq)
+                    # recessive-recessive
+                    c3, c4 = cxOX(p1.city_seq2, p2.city_seq2)
+
+                    # dont recalc. fitness: temp=True
+                    children_app(Salesman(c1, city_seq2=c3, temp=True))
+                    children_app(Salesman(c2, city_seq2=c4, temp=True))
+                else:
+                    c1, c2 = cxOX(p1.city_seq, p2.city_seq)
+                    children_app(Salesman(c1, temp=True))
+                    children_app(Salesman(c2, temp=True))
             else:
                 children_app(p1)
                 children_app(p2)
@@ -97,38 +140,42 @@ def mutation(population=None, pm=1e-4):
         mutants_app = mutants.append
         for s in population:
             city_seq = mutate(s.city_seq, pm)
-            mutants_app(Salesman(city_seq))
+            if Salesman.diploid:
+                city_seq2 = mutate(s.city_seq2, pm)
+                mutants_app(Salesman(city_seq, city_seq2=city_seq2))
+            else:
+                mutants_app(Salesman(city_seq))
         return mutants
 
 
-def cxOX(p1, p2):
+def cxOX(sequence1, sequence2):
     """ordered crossover method."""
-    r1 = random.randint(0, len(p1.city_seq))
+    r1 = random.randint(0, len(sequence1))
     # not len()-1 because i'll be slicing
-    r2 = random.randint(0, len(p2.city_seq))
+    r2 = random.randint(0, len(sequence2))
     if r1 > r2:
         r1, r2 = r2, r1
     elif r1 == r2:
-        if r2 < len(p1.city_seq):
+        if r2 < len(sequence1):
             r2 += 1
         else:
             r1 -= 1
-    middle1 = p1.city_seq[r1:r2]
-    middle2 = p2.city_seq[r1:r2]
+    middle1 = sequence1[r1:r2]
+    middle2 = sequence2[r1:r2]
 
     # child no. 1
-    c1 = [city for city in p2.city_seq[:r1]
+    c1 = [city for city in sequence2[:r1]
           if city not in middle1 and city not in middle2]
     c1 += middle2
-    c1 += [city for city in p2.city_seq[r2:]
+    c1 += [city for city in sequence2[r2:]
            if city not in middle1 and city not in c1]
     c1 += [city for city in middle1 if city not in c1]
 
     # child no. 2
-    c2 = [city for city in p1.city_seq[:r1]
+    c2 = [city for city in sequence1[:r1]
           if city not in middle1 and city not in middle2]
     c2 += middle1
-    c2 += [city for city in p1.city_seq[r2:]
+    c2 += [city for city in sequence1[r2:]
            if city not in middle1 and city not in c2]
     c2 += [city for city in middle2 if city not in c2]
 
