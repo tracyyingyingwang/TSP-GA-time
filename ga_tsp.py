@@ -28,7 +28,7 @@ class Salesman(object):
     velocity_eu = 70
     velocity_pol_min = 50
     velocity_pol_max = 80
-    frequency = 0
+    frequency = 1
     diploid = False
 
     def __init__(self, city_seq, temp=False, city_seq2=None):

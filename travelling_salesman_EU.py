@@ -6,10 +6,11 @@ import numpy as np
 import time
 import handies as hf
 from collections import OrderedDict
+import random
 
 
 def main():
-    start_time = time.time()
+    # start_time = time.time()
 
     # city: (latitude, longtitude) +/- 0.5 degree
     # geocenter for EU: 50 9
@@ -57,67 +58,101 @@ def main():
     # ga.cities_names = cities_names
     # ga.cities_indices = cities_indices
 
-    ga.Salesman.diploid = False
+    ga.Salesman.diploid = True
+    ga.Salesman.frequency = 1
     starters = ga.mfp(200)
-    n = 200
+    pt = 5
+    n = 1000
     pm = 0.02
     pc = 0.9
     tournsize = 4
     # f = open("/home/luke/TSP2.data", "a")
     # f.write("size\tsteps\tpc\tpm\tpath[km]\n")
-
+    start_time = time.time()
     salesmen = starters
 
     # path_s = hf.pathlength(ga.findbest(salesmen).city_seq) * ga.EARTH_RADIUS
-    path_s = 1.0 / ga.findbest(salesmen).fitness
-    print('first population best: ' + str(round(path_s, 2)) + ' hours')
+    path_s = ga.findbest(salesmen).fitness
+    print('first population best: ' + str(round(path_s, 12)) + ' hours')
 
+    results = [[0, path_s]]
     for i in range(n):
+        if i > 0 and i % (n // pt) == 0:
+            ga.Salesman.frequency = abs(ga.Salesman.frequency - 1)
         salesmen = ga.evolution(salesmen, pm, pc, tournsize)
-        # path = 1.0 / ga.findbest(salesmen).fitness
+        path = ga.findbest(salesmen).fitness
+        results.append([i + 1, path])
         # print(i + 1, path)
 
-    path = 1.0 / ga.findbest(salesmen).fitness
-    print(str(n) + '-th population best: ' + str(round(path, 2)) + ' hours')
+    path = ga.findbest(salesmen).fitness
+    print(str(n) + '-th population best: ' + str(round(path, 12)) + ' hours')
     print("Time elapsed: " + str(time.time() - start_time) + 's')
 
-    # plot:
-    fig, ax = plt.subplots(1)
+    start_time = time.time()
+    salesmen = starters
+    ga.Salesman.diploid = False
+    ga.Salesman.frequency = 1
+    # path_s = hf.pathlength(ga.findbest(salesmen).city_seq) * ga.EARTH_RADIUS
+    path_s = ga.findbest(salesmen).fitness
+    print('first population best: ' + str(round(path_s, 12)) + ' hours')
 
-    starters_best_seq = ga.findbest(starters).city_seq
-    starters_best_seq += [starters_best_seq[0]]
-    starters_best_seq = np.asarray(starters_best_seq)
-    plt.plot(starters_best_seq[:, 0], starters_best_seq[:, 1], 'b-', alpha=0.2)
+    results2 = [[0, path_s]]
+    for i in range(n):
+        if i > 0 and i % (n // pt) == 0:
+            ga.Salesman.frequency = abs(ga.Salesman.frequency - 1)
+        salesmen = ga.evolution(salesmen, pm, pc, tournsize)
+        path = ga.findbest(salesmen).fitness
+        results2.append([i + 1, path])
+        # print(i + 1, path)
 
-    labels = cities_indices
-    cities = np.asarray(list(ga.cities.values()))
+    path = ga.findbest(salesmen).fitness
+    print(str(n) + '-th population best: ' + str(round(path, 12)) + ' hours')
+    print("Time elapsed: " + str(time.time() - start_time) + 's')
 
-    plt.scatter(cities[:, 0], cities[:, 1])
-    for label, x, y in zip(labels, cities[:, 0], cities[:, 1]):
-        plt.annotate(label, xy=(x, y), xytext=(-6, -12),
-                     textcoords='offset points')
-    poland_c = hf.equirectangular_projection(52, 19, 50, 9)
-    poland = plt.Circle(poland_c, .047, color='r', alpha=0.3)
-    ax.add_artist(poland)
-
-    best_seq = ga.findbest(salesmen).city_seq
-    best_seq = best_seq + [best_seq[0]]
-    best_seq = np.asarray(best_seq)
-
-    plt.plot(best_seq[:, 0],
-             best_seq[:, 1], 'g-')
-
-    legend = "Legend:\n"
-    legend += "\n".join([str(ii) + ': ' + name
-                         for ii, name in enumerate(cities_names)])
-    # legend += "\nPath length: " + str(round(path, 1)) + ' km'
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(-0.15, 0.95, legend,
-            transform=ax.transAxes,
-            fontsize=14, verticalalignment='top', bbox=props)
-
-    plt.axis('off')
+    results = np.asarray(results)
+    results2 = np.asarray(results2)
+    plt.plot(results[:, 0], results[:, 1], 'b-', label='diploidal')
+    plt.plot(results2[:, 0], results2[:, 1], 'g-', label='haploidal')
+    plt.legend(loc=4)
     plt.show()
+
+    # plot:
+    # fig, ax = plt.subplots(1)
+    #
+    # starters_best_seq = ga.findbest(starters).city_seq
+    # starters_best_seq += [starters_best_seq[0]]
+    # starters_best_seq = np.asarray(starters_best_seq)
+    # plt.plot(starters_best_seq[:, 0], starters_best_seq[:, 1], 'b-', alpha=0.2)
+    #
+    # labels = cities_indices
+    # cities = np.asarray(list(ga.cities.values()))
+    #
+    # plt.scatter(cities[:, 0], cities[:, 1])
+    # for label, x, y in zip(labels, cities[:, 0], cities[:, 1]):
+    #     plt.annotate(label, xy=(x, y), xytext=(-6, -12),
+    #                  textcoords='offset points')
+    # poland_c = hf.equirectangular_projection(52, 19, 50, 9)
+    # poland = plt.Circle(poland_c, .047, color='r', alpha=0.3)
+    # ax.add_artist(poland)
+    #
+    # best_seq = ga.findbest(salesmen).city_seq
+    # best_seq = best_seq + [best_seq[0]]
+    # best_seq = np.asarray(best_seq)
+    #
+    # plt.plot(best_seq[:, 0],
+    #          best_seq[:, 1], 'g-')
+    #
+    # legend = "Legend:\n"
+    # legend += "\n".join([str(ii) + ': ' + name
+    #                      for ii, name in enumerate(cities_names)])
+    # # legend += "\nPath length: " + str(round(path, 1)) + ' km'
+    # props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    # ax.text(-0.15, 0.95, legend,
+    #         transform=ax.transAxes,
+    #         fontsize=14, verticalalignment='top', bbox=props)
+    #
+    # plt.axis('off')
+    # plt.show()
 
     # save to file:
     # savepic(name=str(size) + 'TS_' + str(n) + 'steps_' +
