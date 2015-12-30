@@ -10,31 +10,37 @@ cities = OrderedDict()
 # cities_indices = []
 
 EARTH_RADIUS = 6371
-velocity_eu = 70
-velocity_pol = 50
 
 
 class Salesman(object):
-    """salesman as an object with city sequence and fitness as attr."""
+    """salesman travelling around European Union.
+
+    Attr.:
+    city_seq - order in which the salesman visits cities
+    fitness - 1.0 / <time salesman needs to visit all cities>
+    (and come back to starting point without visitting any city more than once)
+    velocity_eu - velocity everywhere in EU except for Poland
+    velocity_pol_min - min. velocity in Poland
+    velocity_pol_max - max. velocity in Poland
+    frequency - frequency of change between vpmin, vpmax
+    """
+    velocity_eu = 70
+    velocity_pol_min = 50
+    velocity_pol_max = 80
+    frequency = 0
 
     def __init__(self, city_seq):
         """initialize a salesman.
 
         city_seq - sequence of cities for salesman's journey
-        Based on that we calculate salesman's fitness as
-        1.0 / <time they need to visit all cities>
-        (and come back to starting point,
-        without visitting a city more than once)
         """
         self.city_seq = city_seq
-        # self.coords_seq = [cities[cities_names[x]] for x in city_seq]
         self.fitness = self._fitness()
 
     def _fitness(self):
         """return fitness for the salesman."""
-        # t = hf.pathlength(self.coords_seq)
-        # t = hf.pathlength(self.city_seq)
-        t = hf.timelength(self.city_seq, velocity_eu, velocity_pol)
+        t = hf.timelength(self.city_seq, f=self.frequency, v1=self.velocity_eu,
+                          v2=self.velocity_pol_min, v3=self.velocity_pol_max)
         if t != 0:
             return 1.0 / t
         else:

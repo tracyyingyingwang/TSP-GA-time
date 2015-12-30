@@ -74,8 +74,6 @@ def main():
     for i in range(n):
         salesmen = ga.evolution(salesmen, pm, pc, tournsize)
         # path = 1.0 / ga.findbest(salesmen).fitness
-        # path = hf.pathlength(ga.findbest(
-        #     salesmen).city_seq) * ga.EARTH_RADIUS
         # print(i + 1, path)
 
     path = 1.0 / ga.findbest(salesmen).fitness
