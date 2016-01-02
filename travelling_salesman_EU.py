@@ -46,8 +46,8 @@ def main():
     }
 
     cities = OrderedDict(sorted(cities.items(), key=lambda t: t[0]))
-    cities_names = [key for key in cities.keys()]
-    cities_indices = [x for x in range(len(cities))]
+    # cities_indices = [x for x in range(len(cities))]
+    # cities_names = [key for key in cities.keys()]
 
     for key, value in cities.items():
         nu_v = hf.equirectangular_projection(
@@ -59,10 +59,11 @@ def main():
     # ga.cities_indices = cities_indices
 
     ga.Salesman.diploid = True
-    ga.Salesman.frequency = 1
     starters = ga.mfp(200)
-    pt = 5
-    n = 1000
+    v1 = 50
+    v2 = 80
+    T = 100
+    n = 300
     pm = 0.02
     pc = 0.9
     tournsize = 4
@@ -70,36 +71,44 @@ def main():
     # f.write("size\tsteps\tpc\tpm\tpath[km]\n")
     start_time = time.time()
     salesmen = starters
-
+    ga.Salesman.velocity_pol = v1
     # path_s = hf.pathlength(ga.findbest(salesmen).city_seq) * ga.EARTH_RADIUS
     path_s = ga.findbest(salesmen).fitness
-    print('first population best: ' + str(round(path_s, 12)) + ' hours')
+    print('first population best: ' + str(round(1/path_s, 2)) + ' hours')
 
     results = [[0, path_s]]
+    counter = 0
     for i in range(n):
-        if i > 0 and i % (n // pt) == 0:
-            ga.Salesman.frequency = abs(ga.Salesman.frequency - 1)
+        if counter == T // 2 - 1:
+            ga.Salesman.velocity_pol = v1 if ga.Salesman.velocity_pol == v2 \
+                else v2
+            counter = 0
+        counter += 1
         salesmen = ga.evolution(salesmen, pm, pc, tournsize)
         path = ga.findbest(salesmen).fitness
         results.append([i + 1, path])
         # print(i + 1, path)
 
     path = ga.findbest(salesmen).fitness
-    print(str(n) + '-th population best: ' + str(round(path, 12)) + ' hours')
+    print(str(n) + '-th population best: ' + str(round(1/path, 2)) + ' hours')
     print("Time elapsed: " + str(time.time() - start_time) + 's')
 
     start_time = time.time()
     salesmen = starters
     ga.Salesman.diploid = False
-    ga.Salesman.frequency = 1
+    ga.Salesman.velocity_pol = v1
     # path_s = hf.pathlength(ga.findbest(salesmen).city_seq) * ga.EARTH_RADIUS
     path_s = ga.findbest(salesmen).fitness
-    print('first population best: ' + str(round(path_s, 12)) + ' hours')
+    print('first population best: ' + str(round(1/path_s, 2)) + ' hours')
 
     results2 = [[0, path_s]]
+    counter = 0
     for i in range(n):
-        if i > 0 and i % (n // pt) == 0:
-            ga.Salesman.frequency = abs(ga.Salesman.frequency - 1)
+        if counter == T // 2 - 1:
+            ga.Salesman.velocity_pol = v1 if ga.Salesman.velocity_pol == v2 \
+                else v2
+            counter = 0
+        counter += 1
         salesmen = ga.evolution(salesmen, pm, pc, tournsize)
         path = ga.findbest(salesmen).fitness
         results2.append([i + 1, path])

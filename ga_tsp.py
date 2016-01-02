@@ -20,15 +20,11 @@ class Salesman(object):
     fitness - 1.0 / <time salesman needs to visit all cities>
     (and come back to starting point without visitting any city more than once)
     velocity_eu - velocity everywhere in EU except for Poland
-    velocity_pol_min - min. velocity in Poland
-    velocity_pol_max - max. velocity in Poland
-    frequency - frequency of change between vpmin, vpmax
+    velocity_pol - velocity in Poland
     diploid - whether we use haploidal or diploidal encoding (boolean)
     """
     velocity_eu = 70
-    velocity_pol_min = 50
-    velocity_pol_max = 80
-    frequency = 1
+    velocity_pol = 50
     diploid = False
 
     def __init__(self, city_seq, temp=False, city_seq2=None):
@@ -56,8 +52,8 @@ class Salesman(object):
 
     def _fitness(self):
         """return fitness for the salesman."""
-        t = hf.timelength(self.city_seq, f=self.frequency, v1=self.velocity_eu,
-                          v2=self.velocity_pol_min, v3=self.velocity_pol_max)
+        t = hf.timelength(self.city_seq, v1=self.velocity_eu,
+                          v2=self.velocity_pol)
         if t != 0:
             return 1.0 / t
         else:
@@ -65,12 +61,10 @@ class Salesman(object):
 
     def _fitnesses(self):
         """return fitnesses for city_seq and city_seq2."""
-        t1 = hf.timelength(self.city_seq, f=self.frequency,
-                           v1=self.velocity_eu, v2=self.velocity_pol_min,
-                           v3=self.velocity_pol_max)
-        t2 = hf.timelength(self.city_seq2, f=self.frequency,
-                           v1=self.velocity_eu, v2=self.velocity_pol_min,
-                           v3=self.velocity_pol_max)
+        t1 = hf.timelength(self.city_seq, v1=self.velocity_eu,
+                           v2=self.velocity_pol)
+        t2 = hf.timelength(self.city_seq2, v1=self.velocity_eu,
+                           v2=self.velocity_pol,)
         if t1 != 0:
             t1 = 1.0 / t1
         else:
@@ -108,14 +102,7 @@ def crossingover(population=None, pc=0.9):
             r = random.random()
             if pc > r:
                 if Salesman.diploid:
-                    if p1.fitness1 < p1.fitness2:
-                        p1.city_seq, p1.city_seq2 = p1.city_seq2, p1.city_seq
-                    if p2.fitness1 < p2.fitness2:
-                        p2.city_seq, p2.city_seq2 = p2.city_seq2, p2.city_seq
-
-                    # dominant-dominant
                     c1, c2 = cxOX(p1.city_seq, p2.city_seq)
-                    # recessive-recessive
                     c3, c4 = cxOX(p1.city_seq2, p2.city_seq2)
 
                     # dont recalc. fitness: temp=True

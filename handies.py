@@ -60,28 +60,14 @@ def distance_km(p1, p2):
     return math.hypot(p1[0] - p2[0], p1[1] - p2[1]) * r
 
 
-def timelength(sequence, v1=70, v2=50, v3=80, f=0):
+def timelength(sequence, v1=70, v2=50):
     r"""return time of travel with given velocity.
 
     sequence - set of cities
     v1 - velocity everywhere except for Poland
-    v2 - minimum velocity in Poland
-    v3 - max vel. in Poland
-    f - frequency of change between v2 and v3
-    We assume rectangular like function of speed in Poland jumping
-    between v2 and v3 periodically with frequency f
-    In fact what it does is setting an average velocity in Poland.
-    Time = distance / average_velocity, so instead of calculating an
-    average of a signal and complicating the whole procedure
-    we can set f to be between 0 and 1 (no change and maximum change)
-    Where for '0' we have v2 and '1' is a 'symbol' for infinity
-    at which limit of average velocity tends to (v2+v3)/2
-    and thus velocity_pol = velocity_pol_min + 0.5 * f * \
-                            (velocity_pol_max - velocity_pol_min)
-    for '0' (assuming we start rect. func. with v2) velocity tends to v2
+    v2 - velocity in Poland
     """
-    f = max(min(f, 1.0), 0.0)
-    v_c = v2 + 0.5 * f * (v3 - v2)  # speed through the circle [km/h]
+    v_c = v2  # speed through the circle [km/h]
     v = v1  # speed everywhere except for inside of the circle [km/h]
     # geographical center of Poland:
     q = numpy.asarray(equirectangular_projection(52, 19, 50, 9))
