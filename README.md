@@ -6,3 +6,5 @@ Task was to find minimize amount of time needed to visit capitals of European Un
 - in Poland, velocity is changing periodically from 50 to 80 km/h
 
 and compare results of haploidal and diploidal algorithm
+
+Program uses numpy (http://www.numpy.org/) and matplotlib (http://matplotlib.org/)
