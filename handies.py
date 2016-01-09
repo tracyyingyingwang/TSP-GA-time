@@ -66,6 +66,8 @@ def timelength(sequence, v1=70, v2=50):
     sequence - set of cities
     v1 - velocity everywhere except for Poland
     v2 - velocity in Poland
+    Poland is modeled by a circle of radius 300km around its geographical
+    center point. It's accurate within ~10% error margin.
     """
     v_c = v2  # speed through the circle [km/h]
     v = v1  # speed everywhere except for inside of the circle [km/h]
