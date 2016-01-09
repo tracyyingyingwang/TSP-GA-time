@@ -6,10 +6,40 @@ import numpy as np
 import time
 import handies as hf
 from collections import OrderedDict
-import random
 
 
 def main():
+    """run genetic algorithm for a Travelling Salesman Problem.
+
+    Salesman travels through all European Union states' capitals.
+    Assuming velocity in all countries except for Poland to be 70km/h
+    and periodically changing velocity in Poland between 50 and 80 km/h
+    we minimize the time of visitting all the cities.
+    Program prints runs both haploidal and diploidal algorithm,
+    prints out results and shows a graph with cities and calculated routes.
+    Parameters of algorithm are taken from params.txt.
+    File that should look like:
+    50
+    80
+    100
+    300
+    0.02
+    0.9
+    4
+    200
+
+    Where the values are in that order: v1, v2, t, n, pm, pc, tournsize, size.
+    v1, v2 - velocities in Poland
+    (for 50 and 80 there is no visible effect of diploidal solution adapting
+    more swiftly than haploidal so these are not constant, good results are
+    seen for v1 = 0.1 and v2 = 80000 (for example))
+    t - period of change of velocity in Poland (in generations)
+    n - total number of generations
+    pm - probability of mutation
+    pc - prob. of crossingover
+    tournsize - no. of individuals taken for the tournament (selection method)
+    size - total size of population
+    """
     # start_time = time.time()
 
     # city: (latitude, longtitude) +/- 0.5 degree
@@ -57,16 +87,21 @@ def main():
     ga.cities = cities
     # ga.cities_names = cities_names
     # ga.cities_indices = cities_indices
+    param_names = ['v1', 'v2', 't', 'n', 'pm', 'pc', 'tournsize', 'size']
+    f = open('params.txt', 'r')
+    param_values = [float(l) if '.' in l else int(l) for l in f]
+    f.close()
+    params = dict(zip(param_names, param_values))
 
     ga.Salesman.diploid = True
-    starters = ga.mfp(200)
-    v1 = 50
-    v2 = 80
-    t = 100  # period of change of velocity in Poland
-    n = 300  # number of generations
-    pm = 0.02  # probabilty of mutation (per gene)
-    pc = 0.9  # probability of crossover
-    tournsize = 4
+    starters = ga.mfp(params['size'])
+    v1 = params['v1']  # velocity 1 in Poland
+    v2 = params['v2']  # velocity 2 in Poland
+    t = params['t']  # period of change of velocity in Poland
+    n = params['n']  # number of generations
+    pm = params['pm']  # probabilty of mutation (per gene)
+    pc = params['pc']  # probability of crossover
+    tournsize = params['tournsize']
 
     start_time = time.time()
     salesmen = starters
@@ -87,7 +122,7 @@ def main():
         results.append([i + 1, path])
 
     path_d = ga.findbest(salesmen).fitness
-    path_d_seq = ga.findbest(salesmen).city_seq
+    path_d_seq = ga.findbest(salesmen).best_seq
     print(str(n) + '-th population best (diploidal): ' +
           str(round(1 / path_d, 2)) + ' hours')
     print("Time elapsed: " + str(time.time() - start_time) + 's')
@@ -127,7 +162,7 @@ def main():
     fig, ax = plt.subplots(1)
 
     starters_best_seq = ga.findbest(starters).city_seq
-    starters_best_seq += [starters_best_seq[0]]
+    starters_best_seq += [starters_best_seq[0]]  # close the loop
     starters_best_seq = np.asarray(starters_best_seq)
     plt.plot(starters_best_seq[:, 0], starters_best_seq[:, 1], 'r-', alpha=0.2)
 
@@ -142,7 +177,7 @@ def main():
     poland = plt.Circle(poland_c, .047, color='r', alpha=0.3)
     ax.add_artist(poland)
 
-    path_d_seq = path_d_seq + [path_d_seq[0]]  # close the loop
+    path_d_seq = path_d_seq + [path_d_seq[0]]
     path_d_seq = np.asarray(path_d_seq)
 
     path_h_seq = path_h_seq + [path_h_seq[0]]

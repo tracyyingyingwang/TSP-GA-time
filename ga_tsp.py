@@ -22,6 +22,12 @@ class Salesman(object):
     velocity_eu - velocity everywhere in EU except for Poland
     velocity_pol - velocity in Poland
     diploid - whether we use haploidal or diploidal encoding (boolean)
+    for diploid:
+    city_seq2 - second sequence
+    fitness1 - fitness of city_seq
+    fitness2 - fitness of city_seq2
+    fitness - better of the two above
+    best_seq - better of the two sequences
     """
     velocity_eu = 70
     velocity_pol = 50
@@ -49,6 +55,8 @@ class Salesman(object):
             if not temp:
                 self.fitness1, self.fitness2 = self._fitnesses()
                 self.fitness = max(self.fitness1, self.fitness2)
+                self.best_seq = self.city_seq if self.fitness == self.fitness1 \
+                    else self.city_seq2
 
     def _fitness(self):
         """return fitness for the salesman."""
