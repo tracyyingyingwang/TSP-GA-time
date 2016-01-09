@@ -35,7 +35,7 @@ def main():
     seen for v1 = 0.1 and v2 = 80000 (for example))
     t - period of change of velocity in Poland (in generations)
     n - total number of generations
-    pm - probability of mutation
+    pm - probability of mutation (per gene)
     pc - prob. of crossingover
     tournsize - no. of individuals taken for the tournament (selection method)
     size - total size of population
