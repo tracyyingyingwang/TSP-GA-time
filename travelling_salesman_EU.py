@@ -84,6 +84,8 @@ def main():
             value[0], value[1], phi_0=50, l_0=9)
         cities[key] = nu_v
 
+    decoder = {value: key for (key, value) in cities.items()}
+
     ga.cities = cities
     # ga.cities_names = cities_names
     # ga.cities_indices = cities_indices
@@ -125,6 +127,7 @@ def main():
     path_d_seq = ga.findbest(salesmen).best_seq
     print(str(n) + '-th population best (diploidal): ' +
           str(round(1 / path_d, 2)) + ' hours')
+    print([decoder[x] for x in path_d_seq])
     print("Time elapsed: " + str(time.time() - start_time) + 's')
 
     start_time = time.time()
@@ -148,6 +151,7 @@ def main():
     path_h_seq = ga.findbest(salesmen).city_seq
     print(str(n) + '-th population best (haploidal): ' +
           str(round(1 / path_h, 2)) + ' hours')
+    print([decoder[x] for x in path_h_seq])
     print("Time elapsed: " + str(time.time() - start_time) + 's')
 
     # plot fitnesses:
